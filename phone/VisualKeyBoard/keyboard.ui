@@ -22,6 +22,15 @@
   <property name="windowTitle">
    <string>Widget</string>
   </property>
+  <property name="accessibleDescription">
+   <string/>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,1,1,1,1,3">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4,4,4">
@@ -1490,6 +1499,9 @@
        </property>
        <property name="mouseTracking">
         <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">s</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>

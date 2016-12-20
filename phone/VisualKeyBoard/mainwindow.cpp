@@ -2,14 +2,45 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QString>
+#include <QPainter>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    this->setAutoFillBackground(true);    //Widget增加背景图片时，这句一定要。
+    QPixmap pixmap(":/picture1.png");
+    QPixmap fitpixmap=pixmap.scaled(1200, 1200).scaled(this->width(),this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(fitpixmap));
+    this->setPalette(palette);
+
     ui->KeyBoard_CB->setChecked(true);
     ui->Num_Board_CB->setChecked(false);
+
+    ui->IP_LE->setPlaceholderText(tr("电脑IP地址"));  // 设置默认文字
+
+    QString qss1="QGroupBox {\
+    border: 2px solid #0000EE;\
+    border-radius: 5px;\
+    margin-top: 1ex; \
+    font-family:仿宋;\
+    font:blod 14px;\
+    font-size:20px;\
+    }\
+    QGroupBox::title {\
+    subcontrol-origin: margin;\
+    subcontrol-position: top center;\
+    padding: 0 3px;\
+    font-size:20px;\
+    }";
+
+    ui->OPT_GB->setStyleSheet(qss1);
+
+    ui->INFO_LAB->setStyleSheet("QLabel {color: #FF0000;};");
+
     //ui->USE_BTN->setEnabled(false);
     //set lineEdit form for IP address
     /*
@@ -25,6 +56,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(":/picture1.png"));
+}
+
 void MainWindow::MainWindow::on_TEST_BTN_clicked()
 {
     m_IP = ui->IP_LE->text();
@@ -33,13 +70,11 @@ void MainWindow::MainWindow::on_TEST_BTN_clicked()
     if(this->m_tcpSocket.getConnectResult())
     {
         this->ui->INFO_LAB->setText("OK");
-        ui->USE_BTN->setEnabled(true);
         QMessageBox::about(this, "info", "link success!");
     }
     else
     {
         this->ui->INFO_LAB->setText("Error");
-        ui->USE_BTN->setEnabled(false);
         QMessageBox::about(this, "error", this->m_tcpSocket.getLinkError());
     }
 

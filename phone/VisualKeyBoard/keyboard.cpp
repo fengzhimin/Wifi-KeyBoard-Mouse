@@ -2,12 +2,22 @@
 #include "ui_keyboard.h"
 #include <QMouseEvent>
 #include <QMessageBox>
+#include <QBitmap>
+#include <QPainter>
 
 KeyBoard::KeyBoard(QString _ip, short _port, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::KeyBoard)
-{
+{ 
     ui->setupUi(this);
+
+    this->setAutoFillBackground(true);    //Widget增加背景图片时，这句一定要。
+    QPixmap pixmap(":/picture4.png");
+    QPixmap fitpixmap=pixmap.scaled(1200, 1200).scaled(this->width(),this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(fitpixmap));
+    this->setPalette(palette);
+
     this->m_IP = _ip;
     this->m_port = _port;
     bool _connectMouse_ret = m_tcpSocket_mouse.connected(m_IP, 8009);
@@ -15,7 +25,7 @@ KeyBoard::KeyBoard(QString _ip, short _port, QWidget *parent) :
     if(!_connectMouse_ret || !_connectKeyBoard_ret)
     {
         QMessageBox::about(this, "error", "connect PC failure!");
-        QTimer::singleShot(0, this, SLOT(quit()));
+        QTimer::singleShot(0, qApp, SLOT(quit()));
     }
     m_timer = new QTimer(this);
     m_point = 0;
@@ -97,6 +107,8 @@ KeyBoard::KeyBoard(QString _ip, short _port, QWidget *parent) :
     connect(ui->QUES_BTN, SIGNAL(released()), this, SLOT(keyReleased()));
 
     connect(ui->SPACE_BTN, SIGNAL(released()), this, SLOT(keyReleased()));
+
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerUpDate()));
 }
 
 KeyBoard::~KeyBoard()
@@ -108,6 +120,12 @@ void KeyBoard::closeEvent(QCloseEvent *event)
 {
     m_tcpSocket_keyBoard.disconnected();
     m_tcpSocket_mouse.disconnected();
+}
+
+void KeyBoard::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(":/picture4.png"));
 }
 
 void KeyBoard::timerUpDate()
@@ -385,30 +403,30 @@ void KeyBoard::on_NUM9_BTN_pressed()
 }
 void KeyBoard::on_NUM0_BTN_pressed()
 {
-judgeSpecialKey();
-m_str += "11 ";
-keyNum();
+    judgeSpecialKey();
+    m_str += "11 ";
+    keyNum();
 }
 
 void KeyBoard::on_SUB_BTN_pressed()
 {
-judgeSpecialKey();
-m_str += "12 ";
-keyNum();
+    judgeSpecialKey();
+    m_str += "12 ";
+    keyNum();
 }
 
 void KeyBoard::on_ADD_BTN_pressed()
 {
-judgeSpecialKey();
-m_str += "13 ";
-keyNum();
+    judgeSpecialKey();
+    m_str += "13 ";
+    keyNum();
 }
 
 void KeyBoard::on_BACK_BTN_pressed()
 {
-judgeSpecialKey();
-m_str += "14 ";
-    keyNum();
+    judgeSpecialKey();
+    m_str += "14 ";
+        keyNum();
 }
 
 void KeyBoard::on_TAB_BTN_pressed()

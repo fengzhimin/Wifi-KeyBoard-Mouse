@@ -28,6 +28,7 @@ public:
     explicit Num_KeyBoard(QString _ip, short _port, QWidget *parent = 0);
     ~Num_KeyBoard();
     void keyNum();
+    void paintEvent(QPaintEvent *event);
 
 private slots:
     void timerUpDate();

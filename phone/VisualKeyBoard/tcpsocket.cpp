@@ -20,7 +20,7 @@ TcpSocket::~TcpSocket()
 bool TcpSocket::connected(QString _ipaddress, quint16 _port)
 {
     this->socket->connectToHost(_ipaddress, _port, QTcpSocket::ReadWrite);
-    m_connectResult = this->socket->waitForConnected();
+    m_connectResult = this->socket->waitForConnected(5000);
 
     return m_connectResult;
 }

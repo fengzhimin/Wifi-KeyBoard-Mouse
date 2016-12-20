@@ -32,3 +32,10 @@ MOBILITY =
 
 QT += network
 
+RESOURCES += \
+    stylesheet.qrc
+
+DISTFILES += \
+    style.qss \
+    ../../../Downloads/login.jpg
+

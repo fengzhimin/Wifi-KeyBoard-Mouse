@@ -2,12 +2,21 @@
 #include "ui_num_keyboard.h"
 #include <unistd.h>
 #include <QMessageBox>
+#include <QPainter>
 
 Num_KeyBoard::Num_KeyBoard(QString _ip, short _port, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Num_KeyBoard)
 {
     ui->setupUi(this);
+
+    this->setAutoFillBackground(true);    //Widget增加背景图片时，这句一定要。
+    QPixmap pixmap(":/picture4.png");
+    QPixmap fitpixmap=pixmap.scaled(1200, 1200).scaled(this->width(),this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(fitpixmap));
+    this->setPalette(palette);
+
     this->m_IP = _ip;
     this->m_port = _port;
     bool _connect_ret = m_tcpSocket.connected(m_IP, m_port);
@@ -42,6 +51,12 @@ Num_KeyBoard::~Num_KeyBoard()
 {
     m_tcpSocket.disconnected();
     delete ui;
+}
+
+void Num_KeyBoard::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(":/picture4.png"));
 }
 
 void Num_KeyBoard::closeEvent(QCloseEvent *event)

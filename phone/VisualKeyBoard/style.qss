@@ -1,0 +1,43 @@
+QPushButton{
+    border:2px groove gray;
+    border-radius:10px;
+    padding:2px 4px;
+    color:#000000;
+}
+
+QPushButton:hover{
+    background-color: qconicalgradient(cx:0.5, cy:0.522909, angle:179.9, stop:0.494318 rgba(181, 225, 250, 255), stop:0.5 rgba(222, 242, 251, 255));
+    border-radius:5px;
+    border: 1px solid #3C80B1;
+}
+
+QPushButton:pressed{
+    background-color: qconicalgradient(cx:0.5, cy:0.522909, angle:179.9, stop:0.494318 rgba(255, 98, 33, 255), stop:0.5 rgba(255, 34, 48, 255));
+    border-radius:5px;
+    border: 1px solid #5F92B2;
+}
+
+QLabel{
+    color: #333333;
+}
+
+QLineEdit{
+    border:2px groove gray;
+    border-radius:10px;
+    padding:2px 4px;
+}
+
+QCheckBox
+{
+    font-family:Consolas;
+    height:24px;
+    font-size:20px;
+    border-radius:2px;
+}
+QCheckBox::indicator
+{
+    width:20px;
+    height:20px;
+}
+
+

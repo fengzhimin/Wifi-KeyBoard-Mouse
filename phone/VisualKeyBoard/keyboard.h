@@ -42,6 +42,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void keyNum();
+    void paintEvent(QPaintEvent *event);
     void judgeSpecialKey();
 
 private slots:
