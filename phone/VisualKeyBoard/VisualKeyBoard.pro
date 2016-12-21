@@ -37,5 +37,7 @@ RESOURCES += \
 
 DISTFILES += \
     style.qss \
-    ../../../Downloads/login.jpg
+    AndroidManifest.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/
 

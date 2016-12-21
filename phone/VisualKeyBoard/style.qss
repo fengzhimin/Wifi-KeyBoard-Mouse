@@ -17,10 +17,6 @@ QPushButton:pressed{
     border: 1px solid #5F92B2;
 }
 
-QLabel{
-    color: #333333;
-}
-
 QLineEdit{
     border:2px groove gray;
     border-radius:10px;
@@ -31,13 +27,11 @@ QCheckBox
 {
     font-family:Consolas;
     height:24px;
-    font-size:20px;
+    font-size:28px;
     border-radius:2px;
 }
 QCheckBox::indicator
 {
-    width:20px;
-    height:20px;
 }
 
 

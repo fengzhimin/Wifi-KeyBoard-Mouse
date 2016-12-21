@@ -18,8 +18,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void paintEvent(QPaintEvent *event);
     ~MainWindow();
+    void resizeEvent(QResizeEvent *event);
 
 private slots:
     void on_TEST_BTN_clicked();

@@ -3,10 +3,9 @@
         <file>style.qss</file>
     </qresource>
     <qresource prefix="/">
-        <file>picture1.png</file>
-        <file>picture2.png</file>
-        <file>picture3.png</file>
         <file>picture4.png</file>
         <file>picture6.jpg</file>
+        <file>logo.png</file>
+        <file>picture1.jpg</file>
     </qresource>
 </RCC>

@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QString>
 #include <QPainter>
+#include <QFile>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -10,12 +12,20 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->setAutoFillBackground(true);    //Widget增加背景图片时，这句一定要。
-    QPixmap pixmap(":/picture1.png");
-    QPixmap fitpixmap=pixmap.scaled(1200, 1200).scaled(this->width(),this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QPalette palette;
-    palette.setBrush(QPalette::Background, QBrush(fitpixmap));
-    this->setPalette(palette);
+    QString qss;
+    QFile qssFile(":/style.qss/style.qss");
+    qssFile.open(QFile::ReadOnly);
+    if(qssFile.isOpen())
+    {
+        qss = QLatin1String(qssFile.readAll());
+        ui->USE_BTN->setStyleSheet(qss);
+        ui->RESET_BTN->setStyleSheet(qss);
+        ui->TEST_BTN->setStyleSheet(qss);
+        ui->IP_LE->setStyleSheet(qss);
+        ui->Num_Board_CB->setStyleSheet(qss);
+        ui->KeyBoard_CB->setStyleSheet(qss);
+        qssFile.close();
+    }
 
     ui->KeyBoard_CB->setChecked(true);
     ui->Num_Board_CB->setChecked(false);
@@ -23,32 +33,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->IP_LE->setPlaceholderText(tr("电脑IP地址"));  // 设置默认文字
 
     QString qss1="QGroupBox {\
-    border: 2px solid #0000EE;\
-    border-radius: 5px;\
+    border: 5px solid #0000EE;\
+    border-radius: 25px;\
     margin-top: 1ex; \
     font-family:仿宋;\
-    font:blod 14px;\
-    font-size:20px;\
+    font:blod 20px;\
+    font-size:28px;\
+    padding:2px 4px;\
     }\
     QGroupBox::title {\
     subcontrol-origin: margin;\
     subcontrol-position: top center;\
     padding: 0 3px;\
-    font-size:20px;\
+    font-size:30px;\
     }";
 
     ui->OPT_GB->setStyleSheet(qss1);
 
-    ui->INFO_LAB->setStyleSheet("QLabel {color: #FF0000;};");
+    ui->INFO_LAB->setStyleSheet("QLabel {background:transparent;color: #FF0000;};");
+    ui->IP_LAB->setStyleSheet("QLabel {background:transparent;color: #000000;};");
 
-    //ui->USE_BTN->setEnabled(false);
-    //set lineEdit form for IP address
-    /*
-    QRegExp rx("((2[0-4]//d|25[0-5]|[01]?//d//d?)//.){3}(2[0-4]//d|25[0-5]|[01]?//d//d?)");
-    QRegExpValidator v(rx, this);
-    ui->IP_LE->setValidator(&v);
-    ui->IP_LE->setInputMask("000.000.000.000;0");
-    */
+    this->setAutoFillBackground(true);
 }
 
 MainWindow::~MainWindow()
@@ -56,13 +61,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::paintEvent(QPaintEvent *event)
+void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    QPainter painter(this);
-    painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(":/picture1.png"));
+    QWidget::resizeEvent(event);
+    QPalette pal(palette());
+    pal.setBrush(QPalette::Window, QBrush(QPixmap(":/picture1.jpg").scaled(event->size(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
+    setPalette(pal);
 }
 
-void MainWindow::MainWindow::on_TEST_BTN_clicked()
+void MainWindow::on_TEST_BTN_clicked()
 {
     m_IP = ui->IP_LE->text();
     m_port = 8008;

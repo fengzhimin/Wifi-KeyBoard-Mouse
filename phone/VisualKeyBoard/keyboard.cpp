@@ -18,6 +18,16 @@ KeyBoard::KeyBoard(QString _ip, short _port, QWidget *parent) :
     palette.setBrush(QPalette::Background, QBrush(fitpixmap));
     this->setPalette(palette);
 
+    QString qss;
+    QFile qssFile(":/style.qss/style.qss");
+    qssFile.open(QFile::ReadOnly);
+    if(qssFile.isOpen())
+    {
+        qss = QLatin1String(qssFile.readAll());
+        this->setStyleSheet(qss);
+        qssFile.close();
+    }
+
     this->m_IP = _ip;
     this->m_port = _port;
     bool _connectMouse_ret = m_tcpSocket_mouse.connected(m_IP, 8009);
