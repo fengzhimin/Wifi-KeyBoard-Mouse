@@ -3,6 +3,7 @@
 
 #define KEYBOARD_PORT  8008
 #define MOUSE_PORT     8009
+#define AUTOLINK_PORT  5050
 #define BACKLOG        5
 #define BUFSIZE        1024  
 

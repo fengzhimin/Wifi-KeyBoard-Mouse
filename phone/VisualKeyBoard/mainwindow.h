@@ -5,6 +5,7 @@
 #include <QRegExp>
 #include <QTimer>
 #include "tcpsocket.h"
+#include <QTcpServer>
 #include "keyboard.h"
 #include "num_keyboard.h"
 
@@ -32,6 +33,8 @@ private slots:
 
     void on_Num_Board_CB_clicked();
 
+    void OnNewConnection();
+
 private:
     Ui::MainWindow *ui;
 
@@ -42,6 +45,7 @@ public:
     KeyBoard *m_keyBoard;
     Num_KeyBoard *m_num_KeyBoard;
     QTimer *m_timer;
+    QTcpServer* m_pTcpServer;
 };
 
 #endif // MAINWINDOW_H

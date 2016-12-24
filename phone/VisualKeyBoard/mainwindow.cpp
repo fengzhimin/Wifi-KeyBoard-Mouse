@@ -4,7 +4,19 @@
 #include <QString>
 #include <QPainter>
 #include <QFile>
+#include <QDebug>
 #include <QResizeEvent>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -54,6 +66,61 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->IP_LAB->setStyleSheet("QLabel {background:transparent;color: #000000;};");
 
     this->setAutoFillBackground(true);
+
+    //自动寻找IP
+    int serversocket;    struct sockaddr_in serveraddress,clientaddress;
+    int so_broadcast=1;
+    if((serversocket=socket(AF_INET,SOCK_DGRAM,0))<0){
+        qDebug("socket");
+        return ;
+    }
+    if(setsockopt(serversocket,SOL_SOCKET,SO_BROADCAST,&so_broadcast,sizeof(so_broadcast))<0){
+        qDebug("setsockopt");
+        return ;
+    }
+    serveraddress.sin_family=AF_INET;
+    serveraddress.sin_port=htons(INADDR_ANY);
+    serveraddress.sin_addr.s_addr=htonl(INADDR_BROADCAST);
+
+    if(bind(serversocket,(struct sockaddr*)&serveraddress,sizeof(struct sockaddr))<0){
+        qDebug("bind");
+        return ;
+    }
+
+    clientaddress.sin_family=AF_INET;
+    clientaddress.sin_port=htons(5050);
+    clientaddress.sin_addr.s_addr=htonl(INADDR_BROADCAST);
+
+    char buf[200];
+    strcpy(buf, "wifiKeyBoard");
+    if(sendto(serversocket,buf,strlen(buf),0,(struct sockaddr*)&clientaddress,sizeof(clientaddress))<0){
+        qDebug("error");
+        return ;
+    }
+    else
+    {
+        //发送广播地址成功
+        m_pTcpServer = new QTcpServer(this);
+        if (!m_pTcpServer->listen(QHostAddress::AnyIPv4, 5051))
+        {
+            qDebug("server listen to 5051 error, exiting...");
+            return ;
+        }
+        else
+        {
+            connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(OnNewConnection()));
+        }
+    }
+}
+
+//用于获取电脑IP
+void MainWindow::OnNewConnection()
+{
+    qDebug("connect success!\n");
+    QTcpSocket *clientConnection = m_pTcpServer->nextPendingConnection();
+    ui->IP_LE->setText(clientConnection->peerAddress().toString());
+    clientConnection->close();
+    m_pTcpServer->close();
 }
 
 MainWindow::~MainWindow()

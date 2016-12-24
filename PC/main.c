@@ -1,6 +1,13 @@
 #include "module.h"
 #include "config.h"
 #include "socket.h"
+#include <sys/socket.h>  
+#include <unistd.h>  
+#include <sys/types.h>  
+#include <netdb.h>  
+#include <netinet/in.h>  
+#include <arpa/inet.h>  
+#include <string.h> 
   
 void process_conn_mouse_server(int s);   
 void process_conn_keyBoard_server(int s);
@@ -31,83 +38,147 @@ int strToNum(char *_ch)
 
 int main(int argc,char *argv[])  
 {  
-	struct sockaddr_in server_addr_mouse, server_addr_keyboard; //存储服务器端socket地址结构  
-	struct sockaddr_in client_addr_mouse, client_addr_keyboard; //存储客户端 socket地址结构   
-	pid_t pid;  //分叉进行的ID  
+	pid_t autolinkClient;
+	autolinkClient = fork();
+	if(autolinkClient == 0)
+	{ 	
+	    	//处理子进程
+		//接受客户端广播
+		int clientsocket;
+		struct sockaddr_in serveraddress,clientaddress;
 
-	/*****************socket()***************/  
-	ss_mouse = startService(&server_addr_mouse, MOUSE_PORT);
-	ss_keyboard = startService(&server_addr_keyboard, KEYBOARD_PORT);
-	pid = fork();
-	if(pid == 0)
-	{
-		if(ss_mouse != -1)
-	  	{
-			for(;;)  
-			{  
-				socklen_t addrlen = sizeof(client_addr_mouse);  
-				//accept返回客户端套接字描述符  
-				sc_mouse = accept(ss_mouse,(struct sockaddr *)&client_addr_mouse,&addrlen);  //注，此处为了获取返回值使用 指针做参数  
-				if(sc_mouse < 0)  //出错  
-				{  
-				    continue;   //结束此次循环  
-				}  
-				else  
-				{  
-				    printf("mouse server : connected\n");  
-				}  
+		clientsocket=socket(AF_INET,SOCK_DGRAM,0);
 
-				//创建一个子线程，用于与客户端通信  
-				pid_t pid_mouse = fork();  
-				//fork 调用说明：子进程返回 0 ；父进程返回子进程 ID  
-				if(pid_mouse == 0)        //子进程，与客户端通信  
-				{  
-				    close(ss_mouse);  
-				    process_conn_mouse_server(sc_mouse);  
-				}  
-				else  
-				{  
-				    close(sc_mouse);  
-				}  
-			} 
-		} 
-		else
-			printf("open mouse failure!\n");
+		serveraddress.sin_family=AF_INET;
+		serveraddress.sin_port=htons(5050);
+		serveraddress.sin_addr.s_addr=htonl(INADDR_ANY);
+
+		int opt=1;
+		if(setsockopt(clientsocket,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt))<0){
+			perror("setsockopt");
+			return 0;
+		}
+
+		if(bind(clientsocket,(struct sockaddr*)&serveraddress,sizeof(struct sockaddr))!=0){
+			perror("bind");
+			return 0;
+		}
+
+		char buf[200];
+
+		while(1){
+			memset(buf,0,200);
+			int size=0;
+			int size1 = sizeof(struct sockaddr_in);
+			size=recvfrom(clientsocket,buf,200,0,(struct sockaddr*)&serveraddress,(socklen_t*)(&size1));
+			buf[size]='\0';
+			printf("IP:%s msg:%s\n",inet_ntoa(serveraddress.sin_addr),buf);
+			if(strcmp(buf, "wifiKeyBoard") == 0)
+			{
+				//定义sockfd
+				int sock_cli = socket(AF_INET,SOCK_STREAM, 0);
+
+				///定义sockaddr_in
+				struct sockaddr_in servaddr;
+				memset(&servaddr, 0, sizeof(servaddr));
+				servaddr.sin_family = AF_INET;
+				servaddr.sin_port = htons(5051);  ///服务器端口
+				servaddr.sin_addr.s_addr = inet_addr(inet_ntoa(serveraddress.sin_addr));  ///服务器ip
+
+				///连接服务器，成功返回0，错误返回-1
+				if (connect(sock_cli, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+				{
+					perror("connect");
+					exit(1);
+				}
+
+				char sendbuf[200];
+				strcpy(sendbuf, "OK");
+				send(sock_cli, sendbuf, strlen(sendbuf),0); ///发送
+				close(sock_cli);
+			}
+		}
 	}
 	else
 	{
-		if(ss_keyboard != -1)
-	  	{
-			for(;;)  
-			{  
-				socklen_t addrlen = sizeof(client_addr_keyboard);  
-				//accept返回客户端套接字描述符  
-				sc_keyboard = accept(ss_keyboard,(struct sockaddr *)&client_addr_keyboard,&addrlen);  //注，此处为了获取返回值使用 指针做参数  
-				if(sc_keyboard < 0)  //出错  
-				{  
-				    continue;   //结束此次循环  
-				}  
-				else  
-				{  
-				    printf("keyBoard server : connected\n");  
-				}  
+		struct sockaddr_in server_addr_mouse, server_addr_keyboard; //存储服务器端socket地址结构  
+		struct sockaddr_in client_addr_mouse, client_addr_keyboard; //存储客户端 socket地址结构   
+		pid_t pid;  //分叉进行的ID  
 
-				//创建一个子线程，用于与客户端通信  
-				pid_t pid_keyBoard = fork();  
-				//fork 调用说明：子进程返回 0 ；父进程返回子进程 ID  
-				if(pid_keyBoard == 0)        //子进程，与客户端通信  
+		/*****************socket()***************/  
+		ss_mouse = startService(&server_addr_mouse, MOUSE_PORT);
+		ss_keyboard = startService(&server_addr_keyboard, KEYBOARD_PORT);
+		pid = fork();
+		if(pid == 0)
+		{
+			if(ss_mouse != -1)
+		  	{
+				for(;;)  
 				{  
-				    close(ss_keyboard);  
-				    process_conn_keyBoard_server(sc_keyboard);  
-				}  
-				else  
-				{  
-				    close(sc_keyboard);  
-				}  
+					socklen_t addrlen = sizeof(client_addr_mouse);  
+					//accept返回客户端套接字描述符  
+					sc_mouse = accept(ss_mouse,(struct sockaddr *)&client_addr_mouse,&addrlen);  //注，此处为了获取返回值使用 指针做参数  
+					if(sc_mouse < 0)  //出错  
+					{  
+					    continue;   //结束此次循环  
+					}  
+					else  
+					{  
+					    printf("mouse server : connected\n");  
+					}  
+
+					//创建一个子线程，用于与客户端通信  
+					pid_t pid_mouse = fork();  
+					//fork 调用说明：子进程返回 0 ；父进程返回子进程 ID  
+					if(pid_mouse == 0)        //子进程，与客户端通信  
+					{  
+					    close(ss_mouse);  
+					    process_conn_mouse_server(sc_mouse);  
+					}  
+					else  
+					{  
+					    close(sc_mouse);  
+					}  
+				} 
 			} 
-		} 
+			else
+				printf("open mouse failure!\n");
+		}
 		else
-			printf("open keyBoard failure!\n");
+		{
+			if(ss_keyboard != -1)
+		  	{
+				for(;;)  
+				{  
+					socklen_t addrlen = sizeof(client_addr_keyboard);  
+					//accept返回客户端套接字描述符  
+					sc_keyboard = accept(ss_keyboard,(struct sockaddr *)&client_addr_keyboard,&addrlen);  //注，此处为了获取返回值使用 指针做参数  
+					if(sc_keyboard < 0)  //出错  
+					{  
+					    continue;   //结束此次循环  
+					}  
+					else  
+					{  
+					    printf("keyBoard server : connected\n");  
+					}  
+
+					//创建一个子线程，用于与客户端通信  
+					pid_t pid_keyBoard = fork();  
+					//fork 调用说明：子进程返回 0 ；父进程返回子进程 ID  
+					if(pid_keyBoard == 0)        //子进程，与客户端通信  
+					{  
+					    close(ss_keyboard);  
+					    process_conn_keyBoard_server(sc_keyboard);  
+					}  
+					else  
+					{  
+					    close(sc_keyboard);  
+					}  
+				} 
+			} 
+			else
+				printf("open keyBoard failure!\n");
+		}
 	}
 }  
 
@@ -255,6 +326,8 @@ void process_conn_keyBoard_server(int s)
 		if(temp == -1)
 			break;
 		int code = strToNum(buffer);
+
+		printf("%s\n", buffer);
 
 		simulate_keyBoard(fd_keyBoard, code);
 	}  

@@ -2,9 +2,9 @@ TARGET = service
 CC := gcc
 OBJECTS = main.o module.o socket.o
 ifeq ($(compile), debug)
-	CFLAGS := -O2 -Wall -g
+	CFLAGS := -O2 -g -std=c99
 else
-	CFLAGS := -O2 -Wall
+	CFLAGS := -O2 -std=c99
 endif
 LDFLAGS = -lm
 
